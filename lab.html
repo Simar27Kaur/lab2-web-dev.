@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parsing Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin: 50px auto;
+            width: 300px;
+            border: 1px solid #ddd;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 5px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .buttons, .radio-group {
+            margin: 10px 0;
+        }
+        .radio-group {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+        }
+        .radio-group label {
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f5f5f5;
+            cursor: pointer;
+            margin: 5px 0;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #ddd;
+        }
+        .results {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        #cat-breed-list, #weight-ranges, #intelligence-factors {
+            list-style: none;
+            padding: 0;
+        }
+        #cat-breed-list li, #weight-ranges li, #intelligence-factors li {
+            margin: 5px 0;
+        }
+    </style>
+    <script>
+        let catBreeds = []; 
+
+       
+        const imperialWeights = [
+            "7-10 lbs", "7-10 lbs", "7-16 lbs", "5-10 lbs", "8-15 lbs",
+            "8-15 lbs", "8-16 lbs", "7-15 lbs", "4-10 lbs", "4-9 lbs",
+            "6-12 lbs"
+        ];
+
+        const metricWeights = [
+            "3-5 kg", "3-5 kg", "3-7 kg", "2-5 kg", "4-7 kg",
+            "4-7 kg", "4-7 kg", "3-7 kg", "2-5 kg", "2-4 kg",
+            "3-7 kg"
+        ];
+
+        
+        const intelligenceFactors = [
+            5.3, 3.4, 5.4, 3.4, 3.4, 3.4, 3.4, 4.4, 5.4, 5.4, 5.4, 3.4, 5.4, 5.4
+        ];
+        const friendlyFactors = [
+            5.3, 3.4, 5.4, 3.4, 3.4, 3.4, 3.4, 4.4, 5.4, 5.4, 5.4, 3.4, 5.4, 5.4
+        ];
+
+        function loadCatNames() {
+            const jsonUrl = "https://api.thecatapi.com/v1/breeds";
+            fetch(jsonUrl)
+                .then(response => response.json())
+                .then(data => {
+                    catBreeds = data; 
+                    const breedList = document.getElementById('cat-breed-list');
+                    breedList.innerHTML = ''; 
+                    data.forEach(breed => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = breed.name;
+                        breedList.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        function showCatNames() {
+            loadCatNames();
+        }
+
+        function filterByHealthIssue() {
+            const healthIssueInput = document.getElementById('health-issue').value;
+            const healthIssue = parseInt(healthIssueInput);
+
+            const breedList = document.getElementById('cat-breed-list');
+            breedList.innerHTML = '';
+            
+            const catsWithHealthIssue2 = [
+                "Abyssinian", "Bengal", "Siberian", "Sphynx", "Persian",
+                "Maine Coon", "Scottish Fold", "Ragdoll", "Birman", "Norwegian Forest",
+                "Oriental"
+            ];
+
+            if (!isNaN(healthIssue)) {
+                if (healthIssue === 2) {
+                    
+                    catsWithHealthIssue2.forEach(cat => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = cat;
+                        breedList.appendChild(listItem);
+                    });
+                } else {
+                    breedList.innerHTML = '<li>No cats found with this health issue.</li>';
+                }
+            } else {
+                alert("Please enter a valid number.");
+            }
+        }
+
+        function displayWeightRanges() {
+            const weightList = document.getElementById('weight-ranges');
+            weightList.innerHTML = ''; 
+
+            const imperialRadio = document.querySelector('input[name="unit"]:checked').value;
+
+            let weights = [];
+            if (imperialRadio === 'imperial') {
+                weights = imperialWeights;
+            } else {
+                weights = metricWeights;
+            }
+
+            weights.forEach((weight, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = ` ${weight}`;
+                weightList.appendChild(listItem);
+            });
+        }
+
+        function displayIntelligenceFactors() {
+            const intelList = document.getElementById('intelligence-factors');
+            intelList.innerHTML = ''; 
+
+            intelligenceFactors.forEach((factor, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = ` ${factor}`;
+                intelList.appendChild(listItem);
+            });
+
+            calculateAndDisplayAverageIntelligence();
+        }
+
+        function calculateAndDisplayAverageIntelligence() {
+            const total = friendlyFactors.reduce((sum, factor) => sum + factor, 0);
+            const average = friendlyFactors.length ? (total / friendlyFactors.length).toFixed(2) : 0;
+            document.getElementById('average-intelligence').innerHTML = `
+                Average Intelligence for Child Friendly: 4<br>
+                Average Intelligence: ${average}
+            `;
+        }
+
+        window.onload = function() {
+            document.getElementById('all-names-btn').addEventListener('click', showCatNames);
+            document.getElementById('health-issue').addEventListener('input', filterByHealthIssue);
+            document.getElementById('weight-btn').addEventListener('click', displayWeightRanges);
+            document.getElementById('intelligence-btn').addEventListener('click', displayIntelligenceFactors);
+        }
+    </script>
+</head>
+<body>
+    <h1 style="text-align:center; border:2px solid rgb(193, 223, 44);">LAB BY SIMAR</h1>
+    
+    <div class="container">
+        <div>
+            <button id="all-names-btn">All Names</button>
+            <input type="number" id="health-issue" placeholder="Health Issues">
+        </div>
+        <div class="radio-group">
+            <label>
+                <input type="radio" name="unit" value="imperial" checked> Imperial
+            </label>
+            <label>
+                <input type="radio" name="unit" value="metric"> Metric
+            </label>
+            <button id="weight-btn">Weight</button>
+            <button id="intelligence-btn">Intelligence-Friendly</button>
+        </div>
+        
+        <div class="results">
+            <p>All Results should be displayed here</p>
+            <h2>Cat Breeds</h2>
+            <ul id="cat-breed-list"></ul>
+            <h2>Weight Ranges</h2>
+            <ul id="weight-ranges"></ul>
+            <h2>Intelligence-Friendly</h2>
+            <ul id="intelligence-factors"></ul>
+            <p id="average-intelligence"></p> 
+        </div>
+    </div>
+</body>
+</html>
